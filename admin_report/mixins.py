@@ -51,7 +51,7 @@ class ChangeListChartReport(ChangeList):
         for filter_spec in self.filter_specs:
             # print "---- filter_spec ----"
             # print filter_spec.used_parameters
-            if filter_spec.used_parameters and filter_spec.used_parameters.values()[0]:
+            if filter_spec.used_parameters and list(filter_spec.used_parameters.values())[0]:
                 if isinstance(filter_spec, DateRangeFilter):
                     if filter_spec.form.is_valid():
                         # get no null params
