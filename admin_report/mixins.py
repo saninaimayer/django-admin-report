@@ -37,41 +37,16 @@ class ChangeListChartReport(ChangeList):
 
     def get_queryset(self, request):
 
-        # qs = super(self.__class__, self).get_queryset(request)
         # First, we collect all the declared list filters.
         (self.filter_specs, self.has_filters, remaining_lookup_params,
-            filters_use_distinct) = self.get_filters(request)
+         filters_use_distinct) = self.get_filters(request)
 
         # Then, we let every list filter modify the queryset to its liking.
-
         qs = self.root_queryset
-        # print "#### qs antes ####"
-        # print qs.query
-        all_query = {}
         for filter_spec in self.filter_specs:
-            # print "---- filter_spec ----"
-            # print filter_spec.used_parameters
-            if filter_spec.used_parameters and filter_spec.used_parameters.values()[0]:
-                if isinstance(filter_spec, DateRangeFilter):
-                    if filter_spec.form.is_valid():
-                        # get no null params
-                        filter_params = dict(filter(lambda x: bool(x[1]),
-                                                    filter_spec.form.cleaned_data.items()))
-                        all_query.update(**filter_params)
-                else:
-                    all_query.update(filter_spec.used_parameters)
-
-            # comentando a versao do Django, pois da maneira abaixo ele intercala os join gerando joins extras, o que resulta em um resultado errado, nas agregaçoes SUM, COUNT, etc...
-            # new_qs = filter_spec.queryset(request, qs)
-            # if new_qs is not None:
-            #     qs = new_qs
-
-        # coloca o dicionário de uma vez só, assim dessa forma não há problema de criar joins "desnessárias" para filtros que apontam para as mesma tabelas estrangeiras
-        # como explicado logo acima
-        qs = qs.filter(**all_query)
-
-        # print "#### qs depois ####"
-        # print qs.query
+            new_qs = filter_spec.queryset(request, qs)
+            if new_qs is not None:
+                qs = new_qs
 
         try:
             # Finally, we apply the remaining lookup parameters from the query
